@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/Projeto-Eletrico/",
+  base: "/energy-calculator/",
   plugins: [react()],
   server: {
     port: 5173,
