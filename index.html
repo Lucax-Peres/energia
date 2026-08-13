@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energia - Calculadora de Consumo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-top: 4px solid rgb(59, 130, 246);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .app-loading {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body>
+    <div id="root" class="app-loading">
+        <div class="text-center text-white">
+            <h1 class="text-5xl font-bold mb-4">⚡ Energia</h1>
+            <p class="text-xl mb-8">Calculadora de Consumo Energético</p>
+            <div class="spinner mx-auto mb-8"></div>
+            <p class="text-sm opacity-75">Carregando aplicação...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Simulação de carregamento da aplicação
+        setTimeout(() => {
+            const root = document.getElementById('root');
+            root.innerHTML = `
+                <div class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-4">
+                    <div class="max-w-6xl mx-auto">
+                        <header class="text-white text-center py-8">
+                            <h1 class="text-4xl font-bold mb-2">⚡ Calculadora de Energia</h1>
+                            <p class="text-gray-300">Descubra seu consumo energético mensal</p>
+                        </header>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-slate-700 rounded-lg p-6 text-white">
+                                <h2 class="text-2xl font-bold mb-4">📊 Consumo Total</h2>
+                                <p class="text-4xl font-bold text-blue-400">0 kWh</p>
+                                <p class="text-gray-300 mt-2">Mês em andamento</p>
+                            </div>
+                            
+                            <div class="bg-slate-700 rounded-lg p-6 text-white">
+                                <h2 class="text-2xl font-bold mb-4">💰 Custo Estimado</h2>
+                                <p class="text-4xl font-bold text-green-400">R$ 0,00</p>
+                                <p class="text-gray-300 mt-2">Valor aproximado</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-700 rounded-lg p-6 text-white">
+                            <h2 class="text-2xl font-bold mb-4">➕ Adicionar Equipamento</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Nome do Equipamento</label>
+                                    <input type="text" class="w-full bg-slate-600 rounded px-3 py-2 text-white placeholder-gray-400" placeholder="Ex: Geladeira">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Potência (W)</label>
+                                    <input type="number" class="w-full bg-slate-600 rounded px-3 py-2 text-white placeholder-gray-400" placeholder="Ex: 500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Horas/Dia</label>
+                                    <input type="number" class="w-full bg-slate-600 rounded px-3 py-2 text-white placeholder-gray-400" placeholder="Ex: 8">
+                                </div>
+                                <div class="flex items-end">
+                                    <button class="w-full bg-blue-600 hover:bg-blue-700 rounded px-4 py-2 font-medium">Adicionar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="text-center text-gray-400 text-sm mt-8">
+                            🔧 Aplicação em desenvolvimento | Versão estática de teste
+                        </p>
+                    </div>
+                </div>
+            `;
+            root.classList.remove('app-loading');
+        }, 1500);
+    </script>
+</body>
+</html>
