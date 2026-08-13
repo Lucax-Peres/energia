@@ -3,99 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energia - Calculadora de Consumo</title>
+    <meta name="description" content="Calculadora de consumo de energia elétrica residencial - Descubra seu gasto em 30 dias">
+    <title>⚡ Energia - Calculadora de Consumo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
+        :root {
+            --color-bg: #15181C;
+            --color-panel: #1B1F23;
+            --color-panel-alt: #20262C;
+            --color-border: #2A3038;
+            --color-input: #15181C;
+            --color-ink: #EDEDED;
+            --color-ink-strong: #F5F1E8;
+            --color-muted: #8B94A0;
+            --color-faint: #5A6270;
+            --color-amber: #E8A33D;
+            --color-teal: #4FD1C5;
+            --color-terracotta: #EF7A6B;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-ink);
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(59, 130, 246, 0.2);
-            border-top: 4px solid rgb(59, 130, 246);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 0.4;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .app-loading {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        input:focus,
+        button:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--color-amber);
         }
     </style>
 </head>
-<body>
-    <div id="root" class="app-loading">
-        <div class="text-center text-white">
-            <h1 class="text-5xl font-bold mb-4">⚡ Energia</h1>
-            <p class="text-xl mb-8">Calculadora de Consumo Energético</p>
-            <div class="spinner mx-auto mb-8"></div>
-            <p class="text-sm opacity-75">Carregando aplicação...</p>
+<body class="bg-[#15181C] text-[#EDEDED]">
+    <div class="min-h-screen flex flex-col">
+        <div class="flex-1">
+            <div class="max-w-6xl mx-auto px-5 py-10 md:py-16">
+                <!-- Header -->
+                <div class="mb-12">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2.5 rounded-lg bg-gradient-to-br from-[#E8A33D] to-amber-600">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" color="#15181C"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <span class="text-amber-400 font-bold text-2xl">Energia</span>
+                    </div>
+                    <h1 class="font-bold text-5xl sm:text-6xl mb-3 leading-tight">Seu consumo em <span class="text-amber-400">30 dias</span></h1>
+                    <p class="text-[#8B94A0] max-w-2xl text-lg">Cadastre seus aparelhos eletrônicos, quantidade e horas de uso diário para descobrir quanto você consome de energia.</p>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-gradient-to-br from-[#1B1F23] to-[#20262C] border border-[#2A3038] rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[#8B94A0] text-sm font-mono uppercase tracking-wider">Consumo Total</span>
+                            <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z" fill="currentColor"/></svg>
+                        </div>
+                        <div class="text-4xl font-bold font-mono text-[#F5F1E8] mb-1" id="totalKwh">0.0</div>
+                        <div class="text-[#8B94A0] text-sm">kWh em 30 dias</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-[#1B1F23] to-[#20262C] border border-[#2A3038] rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[#8B94A0] text-sm font-mono uppercase tracking-wider">Custo Estimado</span>
+                            <svg class="w-5 h-5 text-[#4FD1C5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div class="text-4xl font-bold font-mono text-[#4FD1C5] mb-1">R$ <span id="totalCost">0.00</span></div>
+                        <div class="text-[#8B94A0] text-sm">valor aproximado</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-[#1B1F23] to-[#20262C] border border-[#2A3038] rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[#8B94A0] text-sm font-mono uppercase tracking-wider">Tarifa</span>
+                            <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <div class="flex items-baseline gap-1 mb-3">
+                            <span class="text-2xl font-bold text-[#F5F1E8]">R$</span>
+                            <input type="number" id="tariff" step="0.01" min="0" value="0.85" class="flex-1 text-2xl font-bold font-mono bg-transparent border-b border-[#2A3038] text-amber-400 transition focus:border-amber-400"/>
+                        </div>
+                        <div class="text-[#8B94A0] text-sm">por kWh</div>
+                    </div>
+                </div>
+
+                <!-- Info Bar -->
+                <div class="bg-[#20262C] border border-[#22282F] rounded-xl px-6 py-4 flex items-center gap-3 mb-8">
+                    <svg class="w-5 h-5 text-amber-400 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <p class="text-[#8B94A0] text-sm">Ciclo de <span class="font-mono text-amber-400">30 dias</span> • Cálculo: Potência (W) × Quantidade × Horas/dia × 30</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <!-- Main Content -->
+                    <div class="lg:col-span-2">
+                        <!-- Add Equipment Form -->
+                        <div class="bg-[#1B1F23] border border-[#2A3038] rounded-2xl p-8 mb-8">
+                            <div class="mb-6">
+                                <h2 class="font-bold text-2xl flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg>
+                                    Adicionar novo equipamento
+                                </h2>
+                                <p class="text-[#8B94A0] text-sm mt-1">Preencha os dados do seu aparelho eletrônico</p>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                                <div>
+                                    <label class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider block mb-2">Aparelho</label>
+                                    <input type="text" id="equipmentName" placeholder="Ex: Ventilador" class="w-full rounded-lg px-4 py-3 bg-[#15181C] border border-[#333B45] text-[#F5F1E8] placeholder-[#5A6270] focus:border-amber-400"/>
+                                </div>
+                                <div>
+                                    <label class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider block mb-2">Potência (W)</label>
+                                    <input type="number" id="equipmentPower" min="0" placeholder="500" class="w-full rounded-lg px-4 py-3 bg-[#15181C] border border-[#333B45] text-[#F5F1E8] placeholder-[#5A6270] font-mono"/>
+                                </div>
+                                <div>
+                                    <label class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider block mb-2">Quantidade</label>
+                                    <input type="number" id="equipmentQty" min="1" value="1" class="w-full rounded-lg px-4 py-3 bg-[#15181C] border border-[#333B45] text-[#F5F1E8] font-mono"/>
+                                </div>
+                                <div>
+                                    <label class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider block mb-2">Horas/dia</label>
+                                    <input type="number" id="equipmentHours" min="0" max="24" step="0.1" placeholder="8" class="w-full rounded-lg px-4 py-3 bg-[#15181C] border border-[#333B45] text-[#F5F1E8] placeholder-[#5A6270] font-mono"/>
+                                </div>
+                                <div class="flex items-end">
+                                    <button onclick="addEquipment()" class="w-full rounded-lg px-6 py-3 font-semibold flex items-center justify-center gap-2 bg-amber-400 text-[#15181C] hover:bg-amber-500">
+                                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg>
+                                        Adicionar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Equipment List -->
+                        <div>
+                            <div class="mb-6">
+                                <h2 class="font-bold text-2xl flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-[#4FD1C5]" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    Equipamentos cadastrados
+                                </h2>
+                                <p class="text-[#8B94A0] text-sm mt-1"><span id="equipmentCount">0</span> equipamentos na sua residência</p>
+                            </div>
+                            <div class="space-y-3 mb-8" id="equipmentList">
+                                <div class="bg-[#1B1F23] border border-[#22282F] rounded-2xl p-12 text-center">
+                                    <svg class="w-8 h-8 mx-auto text-[#5A6270] mb-4 opacity-50" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    <p class="text-[#8B94A0]">Nenhum equipamento cadastrado ainda.</p>
+                                    <p class="text-[#5A6270] text-sm mt-1">Adicione seus aparelhos usando o formulário acima.</p>
+                                </div>
+                            </div>
+
+                            <!-- Total Card -->
+                            <div class="bg-gradient-to-br from-[#20262C] to-[#1B1F23] border border-[#2A3038] rounded-xl p-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <div class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider mb-1">Equipamentos</div>
+                                        <div class="text-2xl font-bold text-[#F5F1E8]" id="totalEquipments">0</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider mb-1">Consumo Total</div>
+                                        <div class="text-2xl font-bold text-[#4FD1C5] font-mono" id="totalKwh2">0.0</div>
+                                        <div class="text-xs text-[#5A6270]">kWh em 30 dias</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider mb-1">Custo Total</div>
+                                        <div class="text-2xl font-bold text-amber-400 font-mono">R$ <span id="totalCost2">0.00</span></div>
+                                        <div class="text-xs text-[#5A6270]">com tarifa configurada</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Sidebar -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-gradient-to-br from-[#1B1F23] to-[#20262C] border border-[#2A3038] rounded-2xl p-6 sticky top-8">
+                            <div class="mb-6">
+                                <h2 class="font-bold text-2xl flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+                                    Consumo por equipamento
+                                </h2>
+                                <p class="text-[#8B94A0] text-sm">Ranking dos aparelhos que mais consomem</p>
+                            </div>
+
+                            <div id="topConsumerCard" class="bg-[#1B1F23] border border-[#2A3038] rounded-lg p-4 mb-6 hidden">
+                                <div class="flex items-baseline justify-between mb-2">
+                                    <span class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider">Maior consumidor</span>
+                                    <span class="text-amber-400 font-bold text-sm" id="topPercentage">0%</span>
+                                </div>
+                                <div class="text-lg font-semibold text-[#F5F1E8]" id="topConsumerName"></div>
+                                <div class="flex items-baseline gap-1 mt-1">
+                                    <span class="text-2xl font-bold text-[#4FD1C5] font-mono" id="topConsumerKwh">0.0</span>
+                                    <span class="text-[#8B94A0] text-sm">kWh/mês</span>
+                                </div>
+                            </div>
+
+                            <canvas id="consumptionChart" style="max-height: 300px;"></canvas>
+
+                            <div class="text-xs text-[#5A6270] border-t border-[#2A3038] pt-4 mt-4">
+                                <p>💡 Dica: Reduza o uso dos aparelhos que mais consomem para economizar na sua conta de energia.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-[#5A6270] text-xs text-center">Estimativa baseada em potência nominal × quantidade × horas de uso, para um ciclo de 30 dias. O consumo real pode variar.</p>
+            </div>
         </div>
     </div>
 
-    <script type="module">
-        // Simulação de carregamento da aplicação
-        setTimeout(() => {
-            const root = document.getElementById('root');
-            root.innerHTML = `
-                <div class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-4">
-                    <div class="max-w-6xl mx-auto">
-                        <header class="text-white text-center py-8">
-                            <h1 class="text-4xl font-bold mb-2">⚡ Calculadora de Energia</h1>
-                            <p class="text-gray-300">Descubra seu consumo energético mensal</p>
-                        </header>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                            <div class="bg-slate-700 rounded-lg p-6 text-white">
-                                <h2 class="text-2xl font-bold mb-4">📊 Consumo Total</h2>
-                                <p class="text-4xl font-bold text-blue-400">0 kWh</p>
-                                <p class="text-gray-300 mt-2">Mês em andamento</p>
+    <script>
+        let equipment = [];
+        let chartInstance = null;
+
+        function calcKwh(item) {
+            return (item.power * item.qty * item.hours * 30) / 1000;
+        }
+
+        function addEquipment() {
+            const name = document.getElementById('equipmentName').value.trim();
+            const power = parseFloat(document.getElementById('equipmentPower').value);
+            const qty = parseFloat(document.getElementById('equipmentQty').value) || 1;
+            const hours = parseFloat(document.getElementById('equipmentHours').value);
+
+            if (!name || !power || !hours) {
+                alert('Preencha aparelho, potência e horas por dia.');
+                return;
+            }
+
+            equipment.push({ id: Date.now(), name, power, qty, hours });
+            document.getElementById('equipmentName').value = '';
+            document.getElementById('equipmentPower').value = '';
+            document.getElementById('equipmentQty').value = '1';
+            document.getElementById('equipmentHours').value = '';
+            updateUI();
+        }
+
+        function removeEquipment(id) {
+            equipment = equipment.filter(e => e.id !== id);
+            updateUI();
+        }
+
+        function updateEquipment(id, field, value) {
+            const item = equipment.find(e => e.id === id);
+            if (item) {
+                item[field] = field === 'name' ? value : parseFloat(value) || 0;
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            const tariff = parseFloat(document.getElementById('tariff').value) || 0.85;
+            let totalKwh = 0, totalCost = 0;
+
+            equipment.forEach(item => {
+                const kwh = calcKwh(item);
+                totalKwh += kwh;
+                totalCost += kwh * tariff;
+            });
+
+            document.getElementById('totalKwh').textContent = totalKwh.toFixed(1);
+            document.getElementById('totalKwh2').textContent = totalKwh.toFixed(1);
+            document.getElementById('totalCost').textContent = totalCost.toFixed(2);
+            document.getElementById('totalCost2').textContent = totalCost.toFixed(2);
+            document.getElementById('equipmentCount').textContent = equipment.length;
+            document.getElementById('totalEquipments').textContent = equipment.length;
+
+            const listHtml = equipment.length === 0 
+                ? '<div class="bg-[#1B1F23] border border-[#22282F] rounded-2xl p-12 text-center"><svg class="w-8 h-8 mx-auto text-[#5A6270] mb-4 opacity-50" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><p class="text-[#8B94A0]">Nenhum equipamento cadastrado ainda.</p><p class="text-[#5A6270] text-sm mt-1">Adicione seus aparelhos usando o formulário acima.</p></div>'
+                : equipment.map(item => {
+                    const kwh = calcKwh(item);
+                    const percent = totalKwh > 0 ? (kwh / totalKwh * 100).toFixed(0) : 0;
+                    return `<div class="bg-[#1B1F23] border border-[#2A3038] rounded-xl p-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                            <div><input type="text" value="${item.name}" onchange="updateEquipment(${item.id}, 'name', this.value)" class="w-full text-lg font-semibold text-[#F5F1E8] bg-transparent border-0 focus:ring-1 focus:ring-amber-400 rounded px-2 py-1"/></div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div><label class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider block mb-1">W</label><input type="number" value="${item.power}" onchange="updateEquipment(${item.id}, 'power', this.value)" class="w-full bg-transparent text-[#F5F1E8] font-mono focus:ring-1 focus:ring-amber-400 rounded px-2 py-1 border-0"/></div>
+                                <div><label class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider block mb-1">Qtd</label><input type="number" min="1" value="${item.qty}" onchange="updateEquipment(${item.id}, 'qty', this.value)" class="w-full bg-transparent text-[#F5F1E8] font-mono focus:ring-1 focus:ring-amber-400 rounded px-2 py-1 border-0"/></div>
+                                <div><label class="text-[#8B94A0] text-xs font-mono uppercase tracking-wider block mb-1">h/dia</label><input type="number" value="${item.hours}" onchange="updateEquipment(${item.id}, 'hours', this.value)" class="w-full bg-transparent text-[#F5F1E8] font-mono focus:ring-1 focus:ring-amber-400 rounded px-2 py-1 border-0"/></div>
                             </div>
-                            
-                            <div class="bg-slate-700 rounded-lg p-6 text-white">
-                                <h2 class="text-2xl font-bold mb-4">💰 Custo Estimado</h2>
-                                <p class="text-4xl font-bold text-green-400">R$ 0,00</p>
-                                <p class="text-gray-300 mt-2">Valor aproximado</p>
+                            <div class="flex items-end gap-4 lg:justify-between">
+                                <div class="text-right"><div class="text-sm text-[#8B94A0] font-mono uppercase tracking-wider">Consumo</div><div class="text-lg font-bold text-[#4FD1C5] font-mono">${kwh.toFixed(1)}</div><div class="text-xs text-[#5A6270]">kWh/mês</div></div>
+                                <div class="text-right"><div class="text-sm text-[#8B94A0] font-mono uppercase tracking-wider">Custo</div><div class="text-lg font-bold text-amber-400 font-mono">R$ ${(kwh * tariff).toFixed(2)}</div><div class="text-xs text-[#5A6270]">${percent}% do total</div></div>
+                                <button onclick="removeEquipment(${item.id})" class="p-2 text-[#5A6270] hover:text-[#EF7A6B] hover:bg-[#EF7A6B]/10 rounded-lg transition"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                             </div>
                         </div>
+                        <div class="mt-3 bg-[#20262C] rounded-full h-2 overflow-hidden"><div class="h-full bg-gradient-to-r from-[#4FD1C5] to-amber-400 transition-all duration-300" style="width: ${percent}%"></div></div>
+                    </div>`;
+                }).join('');
 
-                        <div class="bg-slate-700 rounded-lg p-6 text-white">
-                            <h2 class="text-2xl font-bold mb-4">➕ Adicionar Equipamento</h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Nome do Equipamento</label>
-                                    <input type="text" class="w-full bg-slate-600 rounded px-3 py-2 text-white placeholder-gray-400" placeholder="Ex: Geladeira">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Potência (W)</label>
-                                    <input type="number" class="w-full bg-slate-600 rounded px-3 py-2 text-white placeholder-gray-400" placeholder="Ex: 500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Horas/Dia</label>
-                                    <input type="number" class="w-full bg-slate-600 rounded px-3 py-2 text-white placeholder-gray-400" placeholder="Ex: 8">
-                                </div>
-                                <div class="flex items-end">
-                                    <button class="w-full bg-blue-600 hover:bg-blue-700 rounded px-4 py-2 font-medium">Adicionar</button>
-                                </div>
-                            </div>
-                        </div>
+            document.getElementById('equipmentList').innerHTML = listHtml;
 
-                        <p class="text-center text-gray-400 text-sm mt-8">
-                            🔧 Aplicação em desenvolvimento | Versão estática de teste
-                        </p>
-                    </div>
-                </div>
-            `;
-            root.classList.remove('app-loading');
-        }, 1500);
+            const sorted = [...equipment].sort((a, b) => calcKwh(b) - calcKwh(a));
+            if (sorted.length > 0) {
+                const top = sorted[0];
+                const topKwh = calcKwh(top);
+                const topPercent = (topKwh / totalKwh * 100).toFixed(0);
+                document.getElementById('topConsumerCard').classList.remove('hidden');
+                document.getElementById('topConsumerName').textContent = top.name;
+                document.getElementById('topConsumerKwh').textContent = topKwh.toFixed(1);
+                document.getElementById('topPercentage').textContent = topPercent + '%';
+            } else {
+                document.getElementById('topConsumerCard').classList.add('hidden');
+            }
+
+            updateChart(sorted, tariff, totalKwh);
+        }
+
+        function updateChart(sorted, tariff, totalKwh) {
+            if (sorted.length === 0) {
+                if (chartInstance) chartInstance.destroy(), chartInstance = null;
+                return;
+            }
+
+            const ctx = document.getElementById('consumptionChart');
+            const chartData = sorted.map(item => ({ name: item.name, kwh: calcKwh(item) }));
+            const colors = ['#E8A33D', '#4FD1C5', '#EF7A6B', '#7C9EFF', '#C9A6F2', '#F2C14E', '#5EEAD4', '#F2A6C8'];
+
+            if (chartInstance) {
+                chartInstance.data.labels = chartData.map(d => d.name);
+                chartInstance.data.datasets[0].data = chartData.map(d => parseFloat(d.kwh.toFixed(1)));
+                chartInstance.data.datasets[0].backgroundColor = chartData.map((_, i) => colors[i % colors.length]);
+                chartInstance.update();
+            } else {
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.map(d => d.name),
+                        datasets: [{
+                            label: 'kWh/mês',
+                            data: chartData.map(d => parseFloat(d.kwh.toFixed(1))),
+                            backgroundColor: chartData.map((_, i) => colors[i % colors.length]),
+                            borderRadius: [0, 8, 8, 0],
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: '#2A3038' }, ticks: { color: '#8B94A0' } },
+                            y: { grid: { display: false }, ticks: { color: '#8B94A0' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        document.getElementById('tariff').addEventListener('change', updateUI);
+        document.getElementById('equipmentHours').addEventListener('keypress', (e) => { if (e.key === 'Enter') addEquipment(); });
+
+        equipment = [
+            { id: 1, name: "Ar-condicionado", power: 1500, qty: 1, hours: 8 },
+            { id: 2, name: "Geladeira", power: 100, qty: 1, hours: 24 },
+            { id: 3, name: "Máquina de lavar", power: 750, qty: 1, hours: 1.5 }
+        ];
+        updateUI();
     </script>
 </body>
 </html>
