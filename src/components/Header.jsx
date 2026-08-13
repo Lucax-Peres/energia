@@ -1,24 +1,21 @@
 import React from "react";
-import { Gauge as GaugeIcon } from "lucide-react";
+import { Zap } from "lucide-react";
 
 export default function Header() {
   return (
-    <>
-      <div className="flex items-center gap-3 mb-1">
-        <div className="p-2 rounded-lg bg-panel-alt border border-border">
-          <GaugeIcon size={20} color="#E8A33D" />
+    <div className="mb-12">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2.5 rounded-lg bg-gradient-to-br from-amber to-amber/70">
+          <Zap size={24} color="#15181C" strokeWidth={2.5} />
         </div>
-        <span className="text-muted text-xs uppercase tracking-widest font-mono">
-          painel de consumo residencial
-        </span>
+        <span className="text-amber font-display font-bold text-2xl">Energia</span>
       </div>
-      <h1 className="font-display font-bold text-4xl sm:text-5xl mb-2">
-        Quanto sua casa <span className="text-amber">consome</span>?
+      <h1 className="font-display font-bold text-5xl sm:text-6xl mb-3 leading-tight">
+        Seu consumo em <span className="text-amber">30 dias</span>
       </h1>
-      <p className="text-muted max-w-xl mb-8">
-        Cadastre os equipamentos, a quantidade de cada um e quantas horas por dia ficam ligados.
-        O cálculo usa um ciclo fixo de 30 dias — igual ao seu ciclo de fatura.
+      <p className="text-muted max-w-2xl text-lg">
+        Cadastre seus aparelhos eletrônicos, quantidade e horas de uso diário para descobrir quanto você consome de energia.
       </p>
-    </>
+    </div>
   );
 }

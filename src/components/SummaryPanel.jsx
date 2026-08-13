@@ -1,47 +1,69 @@
 import React from "react";
-import Gauge from "./Gauge.jsx";
-import { formatNumber, formatMoney } from "../utils/calculations.js";
+import { Zap, DollarSign, Lightbulb } from "lucide-react";
+import { formatNumber } from "../utils/calculations.js";
 
-export default function SummaryPanel({ totals, maxScale, tariff, onTariffChange }) {
+export default function SummaryPanel({ totals, tariff, onTariffChange }) {
   return (
-    <div className="bg-panel border border-border rounded-2xl p-6 sm:p-8 mb-8 grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-6 items-center">
-      <div>
-        <Gauge value={totals.kwhMonth} max={maxScale} />
-        <div className="text-center -mt-3">
-          <div className="text-3xl font-bold font-mono text-ink-strong">
-            {formatNumber(totals.kwhMonth, 1)}{" "}
-            <span className="text-muted text-base align-middle">kWh/mês</span>
+    <div className="mb-12">
+      {/* Cards de resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {/* Consumo Total */}
+        <div className="bg-gradient-to-br from-panel to-panel-alt border border-border rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-muted text-sm font-mono uppercase tracking-wider">Consumo Total</span>
+            <div className="p-2 rounded-lg bg-amber/10">
+              <Lightbulb size={18} className="text-amber" />
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-4">
-        <div className="bg-panel-alt border border-border rounded-xl p-4">
-          <div className="text-muted font-mono text-xs uppercase tracking-wider mb-1">
-            custo estimado (30 dias)
+          <div className="text-4xl font-bold font-mono text-ink-strong mb-1">
+            {formatNumber(totals.kwhMonth, 1)}
           </div>
-          <div className="text-3xl font-bold font-mono text-amber">
-            {formatMoney(totals.cost)}
-          </div>
+          <div className="text-muted text-sm">kWh em 30 dias</div>
         </div>
 
-        <div className="bg-panel-alt border border-border rounded-xl p-4">
-          <label className="text-muted font-mono text-xs uppercase tracking-wider mb-2 block">
-            tarifa de energia (R$/kWh)
-          </label>
-          <div className="flex items-center gap-2">
-            <span className="text-muted">R$</span>
+        {/* Custo Estimado */}
+        <div className="bg-gradient-to-br from-panel to-panel-alt border border-border rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-muted text-sm font-mono uppercase tracking-wider">Custo Estimado</span>
+            <div className="p-2 rounded-lg bg-teal/10">
+              <DollarSign size={18} className="text-teal" />
+            </div>
+          </div>
+          <div className="text-4xl font-bold font-mono text-teal mb-1">
+            R$ {formatNumber(totals.cost, 2)}
+          </div>
+          <div className="text-muted text-sm">valor aproximado</div>
+        </div>
+
+        {/* Tarifa */}
+        <div className="bg-gradient-to-br from-panel to-panel-alt border border-border rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-muted text-sm font-mono uppercase tracking-wider">Tarifa</span>
+            <div className="p-2 rounded-lg bg-amber/10">
+              <Zap size={18} className="text-amber" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-1 mb-3">
+            <span className="text-2xl font-bold text-ink-strong">R$</span>
             <input
               type="number"
               step="0.01"
               min="0"
               value={tariff}
               onChange={(e) => onTariffChange(parseFloat(e.target.value) || 0)}
-              className="w-24 rounded-md px-2 py-1.5 bg-input border border-input-border text-ink-strong font-mono"
+              className="flex-1 text-2xl font-bold font-mono bg-transparent border-b border-border text-amber focus:border-amber transition"
             />
-            <span className="text-faint text-sm">por kWh</span>
           </div>
+          <div className="text-muted text-sm">por kWh</div>
         </div>
+      </div>
+
+      {/* Barra informativa */}
+      <div className="bg-panel-alt border border-border-soft rounded-xl px-6 py-4 flex items-center gap-3">
+        <Zap size={18} className="text-amber flex-shrink-0" />
+        <p className="text-muted text-sm">
+          Ciclo de <span className="font-mono text-amber">30 dias</span> • Cálculo: Potência (W) × Quantidade × Horas/dia × 30
+        </p>
       </div>
     </div>
   );
